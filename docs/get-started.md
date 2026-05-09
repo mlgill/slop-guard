@@ -39,6 +39,30 @@ sg -t 60 README.md docs/**/*.md
 
 Add `-v` to inspect individual hits, or `-j` when you want JSON output for scripts.
 
+## Pick a rule preset
+
+slop-guard ships three named presets. The default (`ai_slop`) targets model-generated tells. Pass `--preset writing_quality` for opinionated style checks, or `--preset all` to run both pipelines together.
+
+Run the default `ai_slop` preset:
+
+```bash
+sg README.md
+```
+
+Run the `writing_quality` preset:
+
+```bash
+sg --preset writing_quality README.md
+```
+
+Run both presets in one pass:
+
+```bash
+sg --preset all README.md
+```
+
+When the active pipeline includes any non-default preset, each violation in the JSON output carries a `category` field set to the preset that registered the rule, and the result includes `category_counts` aggregating violations per category. The default-only `ai_slop` output omits both fields and matches the pre-preset release schema.
+
 ## Work from source
 
 From a local checkout, `uv run` exposes the same entry points without publishing a package first:

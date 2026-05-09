@@ -10,6 +10,7 @@ from slop_guard.config import DEFAULT_HYPERPARAMETERS
 from slop_guard.engine import analyze_text
 from slop_guard.models import AnalysisPayload
 from slop_guard.rules.pipeline import Pipeline
+from slop_guard.rules.presets import PRESET_CHOICES, load_preset
 from slop_guard.version import PACKAGE_VERSION
 
 MCP_SERVER_NAME = "slop-guard"
@@ -91,6 +92,15 @@ def _build_parser() -> argparse.ArgumentParser:
         metavar="JSONL",
         help="Path to JSONL rule configuration. Defaults to packaged settings.",
     )
+    parser.add_argument(
+        "--preset",
+        default=None,
+        choices=PRESET_CHOICES,
+        help=(
+            "Load a packaged rule preset by name: 'default' (ai_slop), "
+            "'writing_quality', or 'all'. Mutually exclusive with --config."
+        ),
+    )
     return parser
 
 
@@ -98,6 +108,11 @@ def main(argv: list[str] | None = None) -> None:
     """Run the slop-guard MCP server on stdio."""
     parser = _build_parser()
     args = parser.parse_args(argv)
+    if args.config is not None and args.preset is not None:
+        parser.error("--config and --preset are mutually exclusive.")
     global ACTIVE_PIPELINE
-    ACTIVE_PIPELINE = Pipeline.from_jsonl(args.config)
+    if args.preset is not None:
+        ACTIVE_PIPELINE = load_preset(args.preset)
+    else:
+        ACTIVE_PIPELINE = Pipeline.from_jsonl(args.config)
     mcp_server.run()
