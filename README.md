@@ -13,16 +13,17 @@ Default-only output is unchanged from earlier releases. When the writing-quality
 
 ## Add to Your Agent
 
-Both clients use the same MCP command: `uvx slop-guard`. That resolves against the package published on PyPI; to point an MCP server at a fork or an unreleased branch instead, see [From a fork or unreleased branch](#from-a-fork-or-unreleased-branch).
-If you want a custom rule JSONL, append `-c /path/to/config.jsonl`.
+Both clients launch the MCP server through `uvx`, pointed at this fork's GitHub branch (the fork is not on PyPI). If you want a custom rule JSONL, append `-c /path/to/config.jsonl`.
 The default rule set is the `ai_slop` preset; pass `--preset writing_quality` (or `--preset all`) to opt into the opinionated style checks. See [Rule presets](#rule-presets) for details.
+
+This fork is not on PyPI, so every snippet below points uv at the GitHub branch via `--from git+https://github.com/mlgill/slop-guard@main`. To pin a specific commit, replace `@main` with `@<sha>`.
 
 ### Claude Code
 
 Add from the command line:
 
 ```bash
-claude mcp add slop-guard -- uvx slop-guard
+claude mcp add slop-guard -- uvx --from git+https://github.com/mlgill/slop-guard@main slop-guard
 ```
 
 Add to your `.mcp.json`:
@@ -32,7 +33,11 @@ Add to your `.mcp.json`:
   "mcpServers": {
     "slop-guard": {
       "command": "uvx",
-      "args": ["slop-guard"]
+      "args": [
+        "--from",
+        "git+https://github.com/mlgill/slop-guard@main",
+        "slop-guard"
+      ]
     }
   }
 }
@@ -43,7 +48,7 @@ Add to your `.mcp.json`:
 Add from the command line:
 
 ```bash
-codex mcp add slop-guard -- uvx slop-guard
+codex mcp add slop-guard -- uvx --from git+https://github.com/mlgill/slop-guard@main slop-guard
 ```
 
 Add to your `~/.codex/config.toml`:
@@ -51,10 +56,8 @@ Add to your `~/.codex/config.toml`:
 ```toml
 [mcp_servers.slop-guard]
 command = "uvx"
-args = ["slop-guard"]
+args = ["--from", "git+https://github.com/mlgill/slop-guard@main", "slop-guard"]
 ```
-
-If you want a fixed release, pin it in `args`, for example: `["slop-guard==0.4.1"]`.
 
 ## Rule presets
 
@@ -98,11 +101,21 @@ For Claude Code in `.mcp.json`:
   "mcpServers": {
     "slop-guard": {
       "command": "uvx",
-      "args": ["slop-guard"]
+      "args": [
+        "--from",
+        "git+https://github.com/mlgill/slop-guard@main",
+        "slop-guard"
+      ]
     },
     "slop-guard-writing-quality": {
       "command": "uvx",
-      "args": ["slop-guard", "--preset", "writing_quality"]
+      "args": [
+        "--from",
+        "git+https://github.com/mlgill/slop-guard@main",
+        "slop-guard",
+        "--preset",
+        "writing_quality"
+      ]
     }
   }
 }
@@ -113,11 +126,11 @@ For Codex in `~/.codex/config.toml`:
 ```toml
 [mcp_servers.slop-guard]
 command = "uvx"
-args = ["slop-guard"]
+args = ["--from", "git+https://github.com/mlgill/slop-guard@main", "slop-guard"]
 
 [mcp_servers.slop-guard-writing-quality]
 command = "uvx"
-args = ["slop-guard", "--preset", "writing_quality"]
+args = ["--from", "git+https://github.com/mlgill/slop-guard@main", "slop-guard", "--preset", "writing_quality"]
 ```
 
 ## CLI
