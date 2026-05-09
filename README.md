@@ -278,6 +278,44 @@ Upgrade an installed tool:
 uv tool upgrade slop-guard
 ```
 
+### From a fork or unreleased branch
+
+`uvx slop-guard` (and `uv tool install slop-guard`) resolve against the package published on PyPI. To run an unreleased branch — for example to test a pull request before it lands — point uv at the git source:
+
+```bash
+# One-shot run against a branch
+uvx --from git+https://github.com/OWNER/slop-guard@BRANCH slop-guard
+uvx --from git+https://github.com/OWNER/slop-guard@BRANCH sg draft.md
+
+# Persistent override; subsequent `slop-guard` and `sg` invocations use this build
+uv tool install --from git+https://github.com/OWNER/slop-guard@BRANCH slop-guard
+```
+
+For local iteration, use a checkout path instead of a git URL:
+
+```bash
+uvx --from /path/to/local/slop-guard slop-guard
+```
+
+The same `--from` argument works inside an MCP `args` array, so an `.mcp.json` (or `~/.codex/config.toml`) entry can pin the server to a specific branch:
+
+```json
+{
+  "mcpServers": {
+    "slop-guard": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/OWNER/slop-guard@BRANCH",
+        "slop-guard"
+      ]
+    }
+  }
+}
+```
+
+To return to the published release, drop the `--from` argument or run `uv tool uninstall slop-guard`.
+
 ### From source
 
 From a local checkout:
