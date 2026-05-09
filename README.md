@@ -13,7 +13,7 @@ Default-only output is unchanged from earlier releases. When the writing-quality
 
 ## Add to Your Agent
 
-Both clients use the same MCP command: `uvx slop-guard`.
+Both clients use the same MCP command: `uvx slop-guard`. That resolves against the package published on PyPI; to point an MCP server at a fork or an unreleased branch instead, see [From a fork or unreleased branch](#from-a-fork-or-unreleased-branch).
 If you want a custom rule JSONL, append `-c /path/to/config.jsonl`.
 The default rule set is the `ai_slop` preset; pass `--preset writing_quality` (or `--preset all`) to opt into the opinionated style checks. See [Rule presets](#rule-presets) for details.
 
