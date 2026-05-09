@@ -41,6 +41,7 @@ from slop_guard.config import DEFAULT_HYPERPARAMETERS, Hyperparameters
 from slop_guard.engine import analyze_text
 from slop_guard.models import AnalysisPayload, SourceAnalysisPayload
 from slop_guard.rules.pipeline import Pipeline
+from slop_guard.rules.presets import PRESET_CHOICES, load_preset
 from slop_guard.version import PACKAGE_VERSION
 
 # ---------------------------------------------------------------------------
@@ -135,7 +136,7 @@ def _analyze_text(
 ) -> SourceAnalysisPayload:
     """Run analysis and attach the source label."""
     result = analyze_text(text, hyperparameters=hyperparameters, pipeline=pipeline)
-    return SourceAnalysisPayload(
+    payload = SourceAnalysisPayload(
         score=result["score"],
         band=result["band"],
         word_count=result["word_count"],
@@ -147,6 +148,9 @@ def _analyze_text(
         advice=result["advice"],
         source=source,
     )
+    if "category_counts" in result:
+        payload["category_counts"] = result["category_counts"]
+    return payload
 
 
 def _analyze_file(
@@ -218,6 +222,15 @@ def _build_parser() -> argparse.ArgumentParser:
         default=None,
         metavar="JSONL",
         help="Path to JSONL rule configuration. Defaults to packaged settings.",
+    )
+    p.add_argument(
+        "--preset",
+        default=None,
+        choices=PRESET_CHOICES,
+        help=(
+            "Load a packaged rule preset by name: 'default' (ai_slop), "
+            "'writing_quality', or 'all'. Mutually exclusive with --config."
+        ),
     )
     p.add_argument(
         "-s",
@@ -323,19 +336,27 @@ def _format_config_load_error(path: Path, exc: ConfigLoadError) -> str:
     return f"{path}: {detail}"
 
 
-def _load_pipeline(config_path: str | None) -> Pipeline:
+def _load_pipeline(config_path: str | None, preset: str | None) -> Pipeline:
     """Load the CLI rule pipeline with user-facing config path errors.
 
     Args:
         config_path: Optional JSONL rule configuration path from ``--config``.
+        preset: Optional packaged preset name from ``--preset``.
 
     Returns:
         Loaded rule pipeline.
 
     Raises:
         TypeError: The JSONL config schema is invalid.
-        ValueError: The config path or JSONL payload is invalid.
+        ValueError: Both flags were supplied, the preset is unknown, or the
+            config path or JSONL payload is invalid.
     """
+    if config_path is not None and preset is not None:
+        raise ValueError("--config and --preset are mutually exclusive.")
+
+    if preset is not None:
+        return load_preset(preset)
+
     if config_path is None:
         return Pipeline.from_jsonl()
 
@@ -392,7 +413,7 @@ def cli_main(argv: list[str] | None = None) -> int:
     threshold_failed = False
     hp = DEFAULT_HYPERPARAMETERS
     try:
-        pipeline = _load_pipeline(args.config)
+        pipeline = _load_pipeline(args.config, args.preset)
     except (OSError, TypeError, ValueError) as exc:
         print(f"sg: {exc}", file=sys.stderr)
         return EXIT_ERROR

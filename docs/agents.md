@@ -39,6 +39,41 @@ Register the server with Claude Code by pointing `mcp add` at `uvx slop-guard`, 
 }
 ```
 
+## Choose a rule preset
+
+The MCP server reads the same `--preset` flag from its launch arguments that the CLI does. The default rule set is the `ai_slop` preset; pass `--preset writing_quality` for the opinionated style checks, or `--preset all` to run both. Configure two MCP entries when you want both presets available to the agent under separate names.
+
+Codex `~/.codex/config.toml`:
+
+```toml
+[mcp_servers.slop-guard]
+command = "uvx"
+args = ["slop-guard"]
+
+[mcp_servers.slop-guard-writing-quality]
+command = "uvx"
+args = ["slop-guard", "--preset", "writing_quality"]
+```
+
+Claude Code `.mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "slop-guard": {
+      "command": "uvx",
+      "args": ["slop-guard"]
+    },
+    "slop-guard-writing-quality": {
+      "command": "uvx",
+      "args": ["slop-guard", "--preset", "writing_quality"]
+    }
+  }
+}
+```
+
+When the active pipeline includes any non-default preset, each violation the MCP tool returns carries a `category` field (`"ai_slop"` or `"writing_quality"`) and `category_counts` aggregates violations per category. The default-only `ai_slop` output omits both fields.
+
 ## Pin a release
 
 If an automation or team workflow needs a fixed package version, pin it in the command arguments:
