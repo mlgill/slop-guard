@@ -79,7 +79,7 @@ When the active pipeline includes any non-default preset, each violation the MCP
 If an automation or team workflow needs a fixed package version, pin it in the command arguments:
 
 ```bash
-uvx slop-guard==0.4.1
+uvx slop-guard==0.5.0
 ```
 
 Use the release selector in this documentation site when you want the matching docs for that pinned version.
