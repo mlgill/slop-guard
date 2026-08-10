@@ -1,0 +1,59 @@
+[user]
+    name = Michelle Gill
+    email = mgill@nvidia.com
+
+[core]
+    editor = vim
+    pager = diff-so-fancy | less --tabs=4 -RFX
+
+[interactive]
+    diffFilter = diff-so-fancy --patch
+
+[color "diff"]
+    meta = 11
+    frag = magenta bold
+    func = 146 bold
+    commit = yellow bold
+    old = red bold
+    new = green bold
+    whitespace = red reverse
+
+[color "diff-highlight"]
+    oldNormal = red bold
+    oldHighlight = red bold 52
+    newNormal = green bold
+    newHighlight = green bold 22
+
+[safe]
+    directory = .
+
+[init]
+    defaultBranch = main
+
+[pull]
+    rebase = true
+
+[push]
+    autoSetupRemote = true
+
+[rebase]
+    autoSquash = true
+    autoStash = true
+
+[gpg]
+    format = ssh
+
+[gpg "ssh"]
+    program = /opt/1Password/op-ssh-sign
+
+# [user]
+#     signingkey = ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDn35UflB+3SoW6sVd+QzTnQDrehllewHs3Jx9eU3zxb0JOlgnjHblmbnNXI3tMTPCewnw5vgiAED8FEpM/Gmy0/9eEf10PwjQCG/T/lvaT5yjH0RmyT2n5y3xarFQbzeWk2cb/5SYHMRIqdpr26xxljnaUTgANpqSJiUryTHGXQd3tS1tpBJA0N+XFjBbfm2UYpXT9W0dcmfbb6sUyGdi4NEtdA4SXTZ1p3hW7XtSRpGkQSoqsNPMap/TNSaVxjnVHKc2ONnAJ5dNA0HniXOYjNmIqvisrnMkkXzspPcpo+uRvXeQL0H97bCC255hxRr00Ud/a93g5E5E4mn2o44P3ameoc5C3+SzeYf5WaPYfA1DWNpBT3Q45ahP4xZZvIVp16bnMPrWrXekM4gw/xFhd0NubvgOHUvhn+KHi3FdRPAlI4auV+otJTPaL52Ba0WzcoA9SmQSP9WmQeima5w6E4ZtjoXfjlpcymB8PKM7lbx+aBBU4E0/b+QZdmyeOCqU=
+
+# [commit]
+#     gpgsign = true
+
+[filter "lfs"]
+    clean = git-lfs clean -- %f
+    smudge = git-lfs smudge -- %f
+    process = git-lfs filter-process
+    required = true

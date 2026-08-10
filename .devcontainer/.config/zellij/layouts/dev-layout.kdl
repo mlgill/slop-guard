@@ -1,0 +1,40 @@
+layout {
+    default_tab_template {
+        pane size=1 borderless=true {
+            plugin location="zellij:tab-bar"
+        }
+        children
+        pane size=2 borderless=true {
+            plugin location="zellij:status-bar"
+        }
+    }
+
+    // Tab 1: Dev environment with splits
+    tab name="dev" focus=true {
+        pane split_direction="vertical" {
+            // Left pane: claude
+            pane size="50%" {
+                command "claude"
+                focus true
+            }
+            // Right side: split horizontally for lazygit and yazi
+            pane split_direction="horizontal" size="50%" {
+                // Top right: lazygit
+                pane size="50%" {
+                    command "lazygit"
+                    cwd "/home/mgill/code/virtualCell_perturbai-metrics/scmetrics"
+                }
+                // Bottom right: yazi
+                pane size="50%" {
+                    command "yazi"
+                    cwd "/home/mgill/code/virtualCell_perturbai-metrics/scmetrics"
+                }
+            }
+        }
+    }
+
+    // Tab 2: Current directory
+    tab name="scmetrics" {
+        pane
+    }
+}

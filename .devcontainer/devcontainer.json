@@ -1,0 +1,103 @@
+{
+  "$schema": "https://raw.githubusercontent.com/devcontainers/spec/main/schemas/devContainer.schema.json",
+  "name": "Claude Code Sandbox",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".",
+    "args": {
+      "TZ": "${localEnv:TZ:UTC}",
+      "GIT_DELTA_VERSION": "0.18.2",
+      "ZSH_IN_DOCKER_VERSION": "1.2.1"
+    }
+  },
+  "features": {},
+  "runArgs": [
+    "--hostname=${localWorkspaceFolderBasename}",
+    "--cap-add=NET_ADMIN",
+    "--cap-add=NET_RAW",
+    "-p",
+    "127.0.0.1:${localEnv:DEVC_SSH_HOST_PORT:2222}:${localEnv:DEVC_SSH_HOST_PORT:2222}"
+  ],
+  "init": true,
+  "updateRemoteUserUID": true,
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "anthropic.claude-code"
+      ],
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "zsh",
+        "terminal.integrated.profiles.linux": {
+          "bash": {
+            "path": "bash",
+            "icon": "terminal-bash"
+          },
+          "zsh": {
+            "path": "zsh"
+          }
+        },
+        "files.trimTrailingWhitespace": true,
+        "files.insertFinalNewline": true,
+        "files.trimFinalNewlines": true
+      }
+    }
+  },
+  "remoteUser": "vscode",
+  "mounts": [
+    "source=${localEnv:HOME}/.bashrc,target=/home/vscode/.bashrc.host,type=bind,readonly",
+    "source=${localEnv:HOME}/.claude.json,target=/home/vscode/.claude/.claude.json,type=bind",
+    "source=${localEnv:HOME}/.claude/.mcp.json,target=/home/vscode/.claude/.mcp.json,type=bind,readonly",
+    "source=${localEnv:HOME}/.claude/agents,target=/home/vscode/.claude/agents,type=bind,readonly",
+    "source=${localEnv:HOME}/.claude/skills,target=/home/vscode/.claude/skills,type=bind",
+    "source=${localEnv:HOME}/.codex,target=/home/vscode/.codex,type=bind",
+    "source=${localEnv:HOME}/.config/atuin,target=/home/vscode/.config/atuin,type=bind",
+    "source=${localEnv:HOME}/.config/glab-cli,target=/home/vscode/.config/glab-cli,type=bind",
+    "source=${localEnv:HOME}/.config/lazygit,target=/home/vscode/.config/lazygit,type=bind,readonly",
+    "source=${localEnv:HOME}/.config/op,target=/home/vscode/.config/op,type=bind",
+    "source=${localEnv:HOME}/.config/rclone,target=/home/vscode/.config/rclone,type=bind,readonly",
+    "source=${localEnv:HOME}/.config/zellij,target=/home/vscode/.config/zellij,type=bind",
+    "source=${localEnv:HOME}/.gitconfig,target=/home/vscode/.gitconfig,type=bind,readonly",
+    "source=${localEnv:HOME}/.local/share/atuin,target=/home/vscode/.local/share/atuin,type=bind",
+    "source=${localEnv:HOME}/.netrc,target=/home/vscode/.netrc,type=bind,readonly",
+    "source=${localEnv:HOME}/.ssh,target=/home/vscode/.ssh,type=bind,readonly",
+    "source=${localEnv:HOME}/.zshenv,target=/home/vscode/.zshenv.host,type=bind,readonly",
+    "source=${localEnv:HOME}/.zshrc,target=/home/vscode/.zshrc.host,type=bind,readonly",
+    "source=${localWorkspaceFolder}/.bash_history_devcontainer,target=/home/vscode/.bash_history,type=bind",
+    "source=${localWorkspaceFolder}/.claude/plans,target=/home/vscode/.claude/plans,type=bind",
+    "source=${localWorkspaceFolder}/.codex/config.toml,target=/home/vscode/.codex/config.toml,type=bind,readonly",
+    "source=${localWorkspaceFolder}/.devcontainer,target=/workspace/.devcontainer,type=bind,readonly",
+    "source=${localWorkspaceFolder}/.zsh_state_devcontainer,target=/home/vscode/.zsh_state,type=bind",
+    "source=/data1,target=/data1,type=bind",
+    "source=/data2,target=/data2,type=bind",
+    "source=/etc/ssh/ssh_host_ed25519_key,target=/etc/ssh/ssh_host_ed25519_key,type=bind,readonly",
+    "source=/etc/ssh/ssh_host_ed25519_key.pub,target=/etc/ssh/ssh_host_ed25519_key.pub,type=bind,readonly",
+    "source=devc-${localWorkspaceFolderBasename}-config-${devcontainerId},target=/home/vscode/.claude,type=volume",
+    "source=devc-${localWorkspaceFolderBasename}-gh-${devcontainerId},target=/home/vscode/.config/gh,type=volume"
+  ],
+  "containerEnv": {
+    "SSH_PORT": "${localEnv:DEVC_SSH_HOST_PORT:2222}",
+    "TERM": "xterm-256color",
+    "NODE_OPTIONS": "--max-old-space-size=4096",
+    "CLAUDE_CONFIG_DIR": "/home/vscode/.claude",
+    "GIT_CONFIG_GLOBAL": "/home/vscode/.gitconfig.local",
+    "UV_LINK_MODE": "copy",
+    "NPM_CONFIG_IGNORE_SCRIPTS": "true",
+    "NPM_CONFIG_AUDIT": "true",
+    "NPM_CONFIG_FUND": "false",
+    "NPM_CONFIG_SAVE_EXACT": "true",
+    "NPM_CONFIG_UPDATE_NOTIFIER": "false",
+    "NPM_CONFIG_MINIMUM_RELEASE_AGE": "1440",
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "PIP_DISABLE_PIP_VERSION_CHECK": "1"
+  },
+  "remoteEnv": {
+    "CLAUDE_CODE_OAUTH_TOKEN": "${localEnv:CLAUDE_CODE_OAUTH_TOKEN:}",
+    "ANTHROPIC_API_KEY": "${localEnv:ANTHROPIC_API_KEY:}",
+    "WORKSPACE_FOLDER": "${containerWorkspaceFolder}"
+  },
+  "initializeCommand": "mkdir -p \"$HOME/.codex\" \"$HOME/.claude/agents\" \"$HOME/.claude/skills\" \"$HOME/.config/atuin\" \"$HOME/.config/glab-cli\" \"$HOME/.config/lazygit\" \"$HOME/.config/op\" \"$HOME/.config/rclone\" \"$HOME/.config/zellij\" \"$HOME/.local/share/atuin\" \"$HOME/.ssh\" \"${localWorkspaceFolder}/.claude/plans\" \"${localWorkspaceFolder}/.codex\" \"${localWorkspaceFolder}/.zsh_state_devcontainer\"; for f in \"$HOME/.bashrc\" \"$HOME/.claude.json\" \"$HOME/.claude/.mcp.json\" \"$HOME/.gitconfig\" \"$HOME/.netrc\" \"$HOME/.zshenv\" \"$HOME/.zshrc\" \"${localWorkspaceFolder}/.bash_history_devcontainer\" \"${localWorkspaceFolder}/.codex/config.toml\"; do test -f \"$f\" || touch \"$f\"; done",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=delegated",
+  "workspaceFolder": "/workspace",
+  "postCreateCommand": "uv run --no-project /opt/post_install.py",
+  "postStartCommand": "/workspace/.devcontainer/post_start.sh"
+}

@@ -1,0 +1,65 @@
+add_newline = true
+
+format = """\
+    devc \
+    ${env_var.DEVC_SSH_PORT}\
+    $username\
+    $hostname\
+    $directory\
+    $git_branch\
+    $git_commit\
+    $git_state\
+    $git_status\
+    $python\
+    $conda\
+"""
+
+command_timeout = 1000
+
+[aws]
+disabled = true
+
+[conda]
+style = "bright green"
+
+[git_commit]
+commit_hash_length = 8
+style = "bold white"
+
+[git_state]
+format = '[\($state( $progress_current of $progress_total)\)]($style) '
+
+[git_status]
+conflicted = "⚔️ "
+ahead = "🏎️ x${count} "
+behind = "🐢 x${count} "
+diverged = "🏎️ x${ahead_count} 🐢 x${behind_count} "
+untracked = "🛤️  x${count} "
+stashed = "📦 "
+modified = "📝 x${count} "
+staged = "🗃️ x${count} "
+renamed = "📛 x${count} "
+deleted = "🗑️ x${count} "
+style = "bright-white"
+format = "$all_status$ahead_behind"
+
+[env_var.DEVC_SSH_PORT]
+format = "[(SSH:$env_value) ]($style)"
+style = "bold dimmed yellow"
+
+[hostname]
+ssh_only = true 
+format = "<[$hostname]($style)>"
+style = "bold dimmed white"
+trim_at = ".local"
+disabled = false
+
+[python]
+format = "[$symbol$version]($style) "
+style = "bold green"
+
+[username]
+style_root = "bold red"
+style_user = "bold dimmed blue"
+show_always = false 
+disabled = false

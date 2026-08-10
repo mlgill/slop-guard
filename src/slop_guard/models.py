@@ -16,6 +16,12 @@ class ViolationPayload(TypedDict):
     The optional ``category`` field appears only when the active pipeline
     includes rules tagged with a non-default category (i.e. when the
     writing-quality preset is loaded alongside or instead of the default).
+
+    ``None`` is part of the type because FastMCP builds a pydantic model from
+    this TypedDict and fills absent ``NotRequired`` keys with ``None`` when it
+    dumps the tool result. The MCP server then validates that dump against the
+    schema generated from these annotations, so a bare ``NotRequired[str]``
+    rejects every default-preset call. The analyzer still omits the key.
     """
 
     type: Literal["Violation"]
@@ -25,14 +31,15 @@ class ViolationPayload(TypedDict):
     penalty: int
     start: int
     end: int
-    category: NotRequired[str]
+    category: NotRequired[str | None]
 
 
 class AnalysisPayload(TypedDict):
     """Structured analyzer result produced by the core analyzer.
 
     The optional ``category_counts`` field appears only when the active
-    pipeline includes rules tagged with a non-default category.
+    pipeline includes rules tagged with a non-default category. It admits
+    ``None`` for the same reason ``ViolationPayload.category`` does.
     """
 
     score: int
@@ -44,7 +51,7 @@ class AnalysisPayload(TypedDict):
     weighted_sum: float
     density: float
     advice: list[str]
-    category_counts: NotRequired[Counts]
+    category_counts: NotRequired[Counts | None]
 
 
 class SourceAnalysisPayload(AnalysisPayload):

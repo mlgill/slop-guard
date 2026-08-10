@@ -1,0 +1,7 @@
+model = "gpt-5.5"
+model_reasoning_effort = "high"
+sandbox_mode = "danger-full-access"
+approval_policy = "on-request"
+
+[projects."/workspace"]
+trust_level = "trusted"

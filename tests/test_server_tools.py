@@ -171,3 +171,24 @@ def test_check_slop_file_tool_normalizes_decode_errors(
         match=r"Could not read file: .*utf-8.*can't decode byte 0xff",
     ):
         asyncio.run(tool.run({"file_path": str(target)}, convert_result=True))
+
+
+def test_default_preset_tool_result_passes_output_validation():
+    """FastMCP fills absent NotRequired keys with None; the schema must allow it."""
+    import asyncio
+
+    import jsonschema
+
+    from slop_guard.apps.mcp import mcp_server
+
+    text = "This comprehensive solution leverages best practices and delivers robust value at scale."
+
+    async def run():
+        tools = await mcp_server.list_tools()
+        schema = next(tool for tool in tools if tool.name == "check_slop").outputSchema
+        _, structured = await mcp_server.call_tool("check_slop", {"text": text})
+        return schema, structured
+
+    schema, structured = asyncio.run(run())
+    assert structured["category_counts"] is None
+    jsonschema.validate(instance=structured, schema=schema)
