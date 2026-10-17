@@ -1,6 +1,6 @@
 # slop-guard
 
-[![Docs](https://img.shields.io/badge/docs-GitHub%20Pages-0f706f?style=flat-square&logo=githubpages&logoColor=white)](https://eric-tramel.github.io/slop-guard/docs/)
+[![Upstream Docs](https://img.shields.io/badge/upstream%20docs-GitHub%20Pages-0f706f?style=flat-square&logo=githubpages&logoColor=white)](https://eric-tramel.github.io/slop-guard/docs/)
 
 A rule-based prose linter that scores text 0--100 for formulaic AI writing patterns. No LLM judge, no API calls. Purely programmatic.
 
@@ -8,7 +8,9 @@ The default pipeline loads 24 configurable rules backed by 200+ literal and stru
 
 ## Add to Your Agent
 
-Both clients use the same MCP command: `uvx slop-guard`.
+This is the `mlgill/slop-guard` fork of [Eric Tramel's project](https://github.com/eric-tramel/slop-guard). Its `writing_quality` and `all` presets require this fork. The unqualified PyPI package can have different features; an existing installed tool can also change what a bare `uvx slop-guard` launches.
+
+Both clients can launch this fork with `uvx --from git+https://github.com/mlgill/slop-guard@main slop-guard`. For a persistent executable, see [Installation](#installation).
 If you want a custom rule JSONL, append `-c /path/to/config.jsonl`.
 
 ### Claude Code
@@ -16,7 +18,7 @@ If you want a custom rule JSONL, append `-c /path/to/config.jsonl`.
 Add from the command line:
 
 ```bash
-claude mcp add slop-guard -- uvx slop-guard
+claude mcp add slop-guard -- uvx --from git+https://github.com/mlgill/slop-guard@main slop-guard
 ```
 
 Add to your `.mcp.json`:
@@ -26,7 +28,7 @@ Add to your `.mcp.json`:
   "mcpServers": {
     "slop-guard": {
       "command": "uvx",
-      "args": ["slop-guard"]
+      "args": ["--from", "git+https://github.com/mlgill/slop-guard@main", "slop-guard"]
     }
   }
 }
@@ -37,7 +39,7 @@ Add to your `.mcp.json`:
 Add from the command line:
 
 ```bash
-codex mcp add slop-guard -- uvx slop-guard
+codex mcp add slop-guard -- uvx --from git+https://github.com/mlgill/slop-guard@main slop-guard
 ```
 
 Add to your `~/.codex/config.toml`:
@@ -45,10 +47,10 @@ Add to your `~/.codex/config.toml`:
 ```toml
 [mcp_servers.slop-guard]
 command = "uvx"
-args = ["slop-guard"]
+args = ["--from", "git+https://github.com/mlgill/slop-guard@main", "slop-guard"]
 ```
 
-If you want a fixed release, pin it in `args`, for example: `["slop-guard==0.5.0"]`.
+Replace `@main` with `@<full-commit-sha>` to pin a revision of this fork. Append `--preset writing_quality` or `--preset all` to the server arguments to select those rules. The default preset checks the original slop rules.
 
 ## CLI
 
@@ -58,10 +60,10 @@ The `sg` command lints prose from the terminal. No API keys, no network calls.
 
 ```bash
 # Run without installing
-uvx --from slop-guard sg README.md
+uvx --from git+https://github.com/mlgill/slop-guard@main sg README.md
 
 # Or install it
-uv tool install slop-guard
+uv tool install --from git+https://github.com/mlgill/slop-guard@main slop-guard
 sg README.md
 ```
 
@@ -181,30 +183,35 @@ If `label` is omitted in the target corpus, `sg-fit` treats it as `1` (positive/
 
 Requires [uv](https://docs.astral.sh/uv/).
 
-Run without installing (recommended for MCP setups):
+Run once from this fork:
 
 ```bash
-uvx slop-guard
+uvx --from git+https://github.com/mlgill/slop-guard@main slop-guard
 # MCP server with custom rule config
-uvx slop-guard -c /path/to/config.jsonl
+uvx --from git+https://github.com/mlgill/slop-guard@main slop-guard -c /path/to/config.jsonl
 ```
 
 Install persistently (gives you `slop-guard`, `sg`, and `sg-fit`):
 
 ```bash
-uv tool install slop-guard
+uv tool install --from git+https://github.com/mlgill/slop-guard@main slop-guard
+uv tool dir --bin
 ```
 
-Pin versions for reproducibility:
+Use the absolute `slop-guard` executable path in the printed bin directory as the MCP `command`, with `args = []` for the default preset. For example, if the directory is `/Users/you/.local/bin`, use `/Users/you/.local/bin/slop-guard`. Do not put `~` in a client command that does not expand it.
+
+This option lets a desktop client start the installed executable directly, without invoking `uvx` each time. On macOS, client startup then uses the installed executable path even when the `uv` launcher changes. Verify tool calls after installation and upgrades as described below. A working existing setup needs no reconfiguration.
+
+Pin a revision of this fork for repeatable installation:
 
 ```bash
-uvx slop-guard==0.5.0
+uv tool install --from 'git+https://github.com/mlgill/slop-guard@<full-commit-sha>' slop-guard
 ```
 
-Upgrade an installed tool:
+To replace an existing installation with a selected fork revision, use the same explicit source and `--force`:
 
 ```bash
-uv tool upgrade slop-guard
+uv tool install --force --from 'git+https://github.com/mlgill/slop-guard@<full-commit-sha>' slop-guard
 ```
 
 ### From source
@@ -217,6 +224,12 @@ uv run slop-guard -c config.jsonl
 uv run sg            # CLI linter
 uv run sg-fit data.jsonl rules.fitted.jsonl
 ```
+
+The checked-in `.mcp.json` is a development entry for this checkout. Start the client from the repository root; `uv run slop-guard` resolves that project's dependencies. It contains no developer-specific absolute path. The examples above are for configuring the fork in other projects.
+
+### Verify the selected installation
+
+Run the selected executable with `--help` and confirm it lists `--preset`. Then restart or reconnect the MCP client, list its tools, and call both `check_slop` and `check_slop_file` with a small prose sample. A successful process start or `--version` alone does not prove that a tool result passes MCP output validation. The test suite exercises these calls over stdio with the default, `writing_quality`, and `all` presets.
 
 Core development workflows are also exposed through `make`:
 
