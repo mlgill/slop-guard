@@ -9,25 +9,27 @@ icon: lucide/rocket
 ## Run once
 
 ```bash
-uvx --from slop-guard sg README.md
+uvx --from git+https://github.com/mlgill/slop-guard@main sg README.md
 ```
 
-That command downloads the current release, runs the linter, and exits without installing a long-lived tool.
+That command selects the `mlgill/slop-guard` fork, runs the linter, and exits without installing a long-lived tool. The unqualified PyPI package can have different features. Replace `@main` with a full commit SHA for a fixed revision.
 
 ## Install the CLI
 
 If you want a persistent command, install the package as a `uv` tool:
 
 ```bash
-uv tool install slop-guard
+uv tool install --from git+https://github.com/mlgill/slop-guard@main slop-guard
 sg README.md
 ```
 
-You can pin a specific release when reproducibility matters:
+You can pin a specific fork revision when reproducibility matters:
 
 ```bash
-uv tool install slop-guard==0.5.0
+uv tool install --from 'git+https://github.com/mlgill/slop-guard@<full-commit-sha>' slop-guard
 ```
+
+For a desktop MCP client, `uv tool dir --bin` reports the directory containing the installed executable. Configure its absolute `slop-guard` path as the command. See [Agents](agents.md) for launch arguments and connection checks.
 
 ## Gate prose in CI
 

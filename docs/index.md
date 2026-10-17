@@ -13,13 +13,13 @@ This site is versioned by release. Use the selector in the header to move betwee
 Run the CLI once with `uvx`:
 
 ```bash
-uvx --from slop-guard sg README.md
+uvx --from git+https://github.com/mlgill/slop-guard@main sg README.md
 ```
 
-That command installs the published package into a temporary environment, lints the file, and prints a compact score line. When you need the exact matches and rewrite guidance, rerun it with `-v`:
+That command selects this fork in a temporary environment, lints the file, and prints a compact score line. When you need the exact matches and rewrite guidance, rerun it with `-v`:
 
 ```bash
-uvx --from slop-guard sg -v README.md
+uvx --from git+https://github.com/mlgill/slop-guard@main sg -v README.md
 ```
 
 Continue with [Get Started](get-started.md) for installation and local workflows, or jump to [Agents](agents.md) for Codex and Claude Code setup.

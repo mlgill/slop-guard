@@ -93,9 +93,11 @@ def test_category_counts_aggregates_violations_per_category() -> None:
         text, hyperparameters=DEFAULT_HYPERPARAMETERS, pipeline=pipeline
     )
 
-    total_counted = sum(result["category_counts"].values())
+    category_counts = result["category_counts"]
+    assert category_counts is not None
+    total_counted = sum(category_counts.values())
     assert total_counted == len(result["violations"])
-    assert result["category_counts"]["writing_quality"] == len(result["violations"])
+    assert category_counts["writing_quality"] == len(result["violations"])
 
 
 def test_category_counts_handles_mixed_pipelines() -> None:
@@ -112,11 +114,13 @@ def test_category_counts_handles_mixed_pipelines() -> None:
         text, hyperparameters=DEFAULT_HYPERPARAMETERS, pipeline=mixed_pipeline
     )
 
-    assert "ai_slop" in result["category_counts"]
-    assert "writing_quality" in result["category_counts"]
-    assert result["category_counts"]["ai_slop"] + result["category_counts"][
-        "writing_quality"
-    ] == len(result["violations"])
+    category_counts = result["category_counts"]
+    assert category_counts is not None
+    assert "ai_slop" in category_counts
+    assert "writing_quality" in category_counts
+    assert category_counts["ai_slop"] + category_counts["writing_quality"] == len(
+        result["violations"]
+    )
 
 
 def test_category_counts_empty_when_writing_quality_pipeline_has_no_hits() -> None:
