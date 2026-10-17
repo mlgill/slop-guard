@@ -13,6 +13,7 @@ nav = [
   { "Overview" = "index.md" },
   { "Get Started" = "get-started.md" },
   { "Agents" = "agents.md" },
+  { "Writing profiles" = "writing-profiles.md" },
   { "Rules" = [
     { "Overview" = "rules/index.md" },
     { "Word rules" = [
@@ -46,6 +47,7 @@ nav = [
       { "Closing Aphorism" = "rules/closing-aphorism.md" },
       { "Paragraph Balance" = "rules/paragraph-balance.md" },
       { "Paragraph CV" = "rules/paragraph-cv.md" },
+      { "Substantial Prose Style" = "rules/substantial-prose-style.md" },
     ] },
   ] },
 ]

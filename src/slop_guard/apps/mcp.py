@@ -10,28 +10,38 @@ from slop_guard.config import DEFAULT_HYPERPARAMETERS
 from slop_guard.engine import analyze_text
 from slop_guard.models import AnalysisPayload
 from slop_guard.rules.pipeline import Pipeline
-from slop_guard.rules.presets import PRESET_CHOICES, load_preset
+from slop_guard.rules.presets import PRESET_CHOICES, ProfileName, load_preset
 from slop_guard.version import PACKAGE_VERSION
 
 MCP_SERVER_NAME = "slop-guard"
 mcp_server = FastMCP(MCP_SERVER_NAME)
 DEFAULT_PIPELINE = Pipeline.from_jsonl()
 ACTIVE_PIPELINE = DEFAULT_PIPELINE
+ACTIVE_PROFILE = "default"
+REQUIRE_ABSOLUTE_PATHS = False
 
 
 @mcp_server.tool()
-def check_slop(text: str) -> AnalysisPayload:
+def check_slop(text: str, profile: ProfileName | None = None) -> AnalysisPayload:
     """Analyze text for AI slop patterns.
 
     Returns a JSON object with a score (0-100), band label, list of specific
     violations with context and character offsets, and actionable advice for
     each issue found.
     """
-    return analyze_text(
+    # A per-call selection never changes the configured startup pipeline.
+    selected = ACTIVE_PROFILE if profile is None else profile
+    try:
+        pipeline = ACTIVE_PIPELINE if profile is None else load_preset(profile)
+    except ValueError as exc:
+        raise ToolError(str(exc)) from exc
+    payload = analyze_text(
         text,
         hyperparameters=DEFAULT_HYPERPARAMETERS,
-        pipeline=ACTIVE_PIPELINE,
+        pipeline=pipeline,
     )
+    payload["profile"] = selected
+    return payload
 
 
 def _read_analysis_file(file_path: str) -> str:
@@ -40,6 +50,10 @@ def _read_analysis_file(file_path: str) -> str:
         raise ToolError("File path must not be empty.")
 
     path = Path(file_path)
+    if REQUIRE_ABSOLUTE_PATHS and not path.is_absolute():
+        raise ToolError(
+            "An absolute file path is required by this server configuration."
+        )
     try:
         if path.is_dir():
             raise ToolError(f"Path is a directory, not a file: {file_path}")
@@ -57,7 +71,9 @@ def _read_analysis_file(file_path: str) -> str:
 
 
 @mcp_server.tool()
-def check_slop_file(file_path: str) -> AnalysisPayload:
+def check_slop_file(
+    file_path: str, profile: ProfileName | None = None
+) -> AnalysisPayload:
     """Analyze a file for AI slop patterns.
 
     Reads the file at the given path and runs the same analysis as check_slop.
@@ -66,11 +82,7 @@ def check_slop_file(file_path: str) -> AnalysisPayload:
     each issue found.
     """
     text = _read_analysis_file(file_path)
-    return analyze_text(
-        text,
-        hyperparameters=DEFAULT_HYPERPARAMETERS,
-        pipeline=ACTIVE_PIPELINE,
-    )
+    return check_slop(text, profile)
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -98,8 +110,14 @@ def _build_parser() -> argparse.ArgumentParser:
         choices=PRESET_CHOICES,
         help=(
             "Load a packaged rule preset by name: 'default' (ai_slop), "
-            "'writing_quality', or 'all'. Mutually exclusive with --config."
+            "'writing_quality', 'all', 'casual', 'professional-email', or "
+            "'leadership-update'. Mutually exclusive with --config."
         ),
+    )
+    parser.add_argument(
+        "--require-absolute-paths",
+        action="store_true",
+        help="Reject relative file paths when a plugin controls the server working directory.",
     )
     return parser
 
@@ -110,7 +128,13 @@ def main(argv: list[str] | None = None) -> None:
     args = parser.parse_args(argv)
     if args.config is not None and args.preset is not None:
         parser.error("--config and --preset are mutually exclusive.")
-    global ACTIVE_PIPELINE
+    global ACTIVE_PIPELINE, ACTIVE_PROFILE, REQUIRE_ABSOLUTE_PATHS
+    REQUIRE_ABSOLUTE_PATHS = args.require_absolute_paths
+    ACTIVE_PROFILE = (
+        args.preset
+        if args.preset is not None
+        else ("custom" if args.config is not None else "default")
+    )
     if args.preset is not None:
         ACTIVE_PIPELINE = load_preset(args.preset)
     else:

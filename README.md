@@ -243,6 +243,19 @@ make verify-wheel
 
 ## MCP Tools
 
+### Audience profiles
+
+Use `--preset casual`, `--preset professional-email`, or `--preset leadership-update`
+for audience-specific checks. Both MCP tools also accept an optional `profile`
+argument for the current call; omission keeps the startup preset. The original
+presets remain available. See [Writing profiles](docs/writing-profiles.md) for
+the settings, semantic-review requirements, and optional report-only hook.
+
+Profile checks report selected stock phrases from ten prose words and request
+contextual review at fifty. The returned `review_requirements` are pending work
+for the writing agent; a clean numeric score does not complete that review.
+Plugin servers can require absolute file paths with `--require-absolute-paths`.
+
 `check_slop(text)`: Analyze a string. Returns JSON diagnostics only; it does not repeat the input text.
 
 `check_slop_file(file_path)`: Read a file from disk and analyze it. Same output, without repeating the file path in the payload.
@@ -282,6 +295,8 @@ total_penalty  sum of all penalty values
 weighted_sum   after concentration multiplier
 density        weighted_sum per 1000 words
 advice         array of advice strings, one per distinct issue
+profile        selected CLI/MCP preset, or "custom" for startup --config
+review_requirements  array of pending semantic criteria (empty for legacy presets)
 ```
 
 MCP tool responses omit `source`, because the tool transport already carries the

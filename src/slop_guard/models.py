@@ -52,6 +52,42 @@ class AnalysisPayload(TypedDict):
     density: float
     advice: list[str]
     category_counts: NotRequired[Counts | None]
+    review_requirements: list["ReviewRequirementPayload"]
+    profile: NotRequired[str | None]
+
+
+class ReviewCriterionPayload(TypedDict):
+    """One contextual writing criterion for the caller to assess."""
+
+    key: str
+    instruction: str
+
+
+class ReviewRequirementPayload(TypedDict):
+    """Pending semantic assessment, independent of the deterministic score."""
+
+    type: Literal["ReviewRequirement"]
+    rule: str
+    reason: str
+    criteria: list[ReviewCriterionPayload]
+
+
+@dataclass(frozen=True)
+class ReviewRequirement:
+    """Contextual review guidance adapted from upstream PR 125 under MIT."""
+
+    rule: str
+    reason: str
+    criteria: tuple[ReviewCriterionPayload, ...]
+
+    def to_payload(self) -> ReviewRequirementPayload:
+        """Serialize pending guidance without implying completed review."""
+        return {
+            "type": "ReviewRequirement",
+            "rule": self.rule,
+            "reason": self.reason,
+            "criteria": list(self.criteria),
+        }
 
 
 class SourceAnalysisPayload(AnalysisPayload):
@@ -111,6 +147,7 @@ class RuleResult:
     violations: list[Violation] = field(default_factory=list)
     advice: list[str] = field(default_factory=list)
     count_deltas: Counts = field(default_factory=dict)
+    review_requirements: list[ReviewRequirement] = field(default_factory=list)
 
 
 @dataclass(frozen=True)
@@ -120,6 +157,7 @@ class AnalysisState:
     violations: tuple[Violation, ...]
     advice: tuple[str, ...]
     counts: Counts
+    review_requirements: tuple[ReviewRequirement, ...] = ()
 
     @classmethod
     def initial(cls, count_keys: Iterable[str] | None = None) -> "AnalysisState":
@@ -139,4 +177,6 @@ class AnalysisState:
             violations=self.violations + tuple(result.violations),
             advice=self.advice + tuple(result.advice),
             counts=merged_counts,
+            review_requirements=self.review_requirements
+            + tuple(result.review_requirements),
         )

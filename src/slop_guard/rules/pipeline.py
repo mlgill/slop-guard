@@ -58,10 +58,30 @@ class Pipeline:
             path: JSONL path. If omitted, loads packaged defaults.
         """
         raw_lines = _read_jsonl_lines(path)
+        prose_only = False
+        for index, line in enumerate(raw_lines):
+            if not line.strip():
+                continue
+            try:
+                header = json.loads(line)
+            except json.JSONDecodeError:
+                break  # The rule parser below reports the original line number.
+            if isinstance(header, dict) and "prose_only" in header:
+                if set(header) != {"prose_only"} or header["prose_only"] is not True:
+                    raise ValueError(
+                        "A prose_only header must contain only prose_only: true"
+                    )
+                prose_only = True
+                raw_lines[index] = ""
+            break
         rules = _parse_rules_from_jsonl(raw_lines)
         if not rules:
             source = "<package default>" if path is None else str(path)
             raise ValueError(f"JSONL rule configuration is empty: {source}")
+        if prose_only:
+            from .prose import ProsePipeline
+
+            return ProsePipeline(rules)
         return cls(rules)
 
     def to_jsonl(self, path: str | Path) -> None:
@@ -90,9 +110,14 @@ class Pipeline:
                     violations=tagged,
                     advice=result.advice,
                     count_deltas=result.count_deltas,
+                    review_requirements=result.review_requirements,
                 )
             state = state.merge(result)
         return state
+
+    def prepare_document(self, document: AnalysisDocument) -> AnalysisDocument:
+        """Return the document view used for rule execution and score density."""
+        return document
 
     def fit(
         self,

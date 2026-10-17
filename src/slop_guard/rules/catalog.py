@@ -44,4 +44,9 @@ WRITING_QUALITY_RULE_PATHS: tuple[str, ...] = (
     "slop_guard.rules.paragraph.narrative_heading.NarrativeHeadingRule",
 )
 
-ALL_RULE_PATHS: tuple[str, ...] = DEFAULT_RULE_PATHS + WRITING_QUALITY_RULE_PATHS
+PROFILE_RULE_PATHS: tuple[str, ...] = (
+    "slop_guard.rules.passage.substantial_prose_style.SubstantialProseStyleRule",
+)
+ALL_RULE_PATHS: tuple[str, ...] = (
+    DEFAULT_RULE_PATHS + WRITING_QUALITY_RULE_PATHS + PROFILE_RULE_PATHS
+)
