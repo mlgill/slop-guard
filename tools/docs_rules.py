@@ -24,7 +24,11 @@ from pathlib import Path
 from typing import Any, TypeAlias
 
 from slop_guard.rules.base import Rule
-from slop_guard.rules.catalog import ALL_RULE_PATHS, DEFAULT_RULE_PATHS
+from slop_guard.rules.catalog import (
+    ALL_RULE_PATHS,
+    DEFAULT_RULE_PATHS,
+    WRITING_QUALITY_RULE_PATHS,
+)
 
 RulePath: TypeAlias = str
 ConfigMap: TypeAlias = dict[str, Any]
@@ -146,7 +150,7 @@ def _load_default_configs() -> dict[str, ConfigMap]:
     surfaced on its docs page, regardless of which preset registers it.
     """
     configs: dict[str, ConfigMap] = {}
-    for asset_name in ("default.jsonl", "writing_quality.jsonl"):
+    for asset_name in ("casual.jsonl", "default.jsonl", "writing_quality.jsonl"):
         raw_text = (
             files("slop_guard.rules")
             .joinpath(f"assets/{asset_name}")
@@ -157,6 +161,8 @@ def _load_default_configs() -> dict[str, ConfigMap]:
             if not stripped:
                 continue
             payload = json.loads(stripped)
+            if payload == {"prose_only": True}:
+                continue
             configs[payload["rule_type"]] = dict(payload["config"])
     return configs
 
@@ -371,10 +377,7 @@ def _render_header(doc: RuleDoc, summary: str, source_url: str) -> str:
         "  </div>",
     ]
     if summary:
-        lines.append(
-            '  <p class="sg-rule-page__lede" markdown>'
-            f"{summary}</p>"
-        )
+        lines.append(f'  <p class="sg-rule-page__lede" markdown>{summary}</p>')
     lines.append("</header>")
     return "\n".join(lines)
 
@@ -553,7 +556,10 @@ def render_index_page(docs: list[RuleDoc]) -> str:
     groups = _group_by_level(docs)
     total = len(docs)
     default_count = sum(1 for doc in docs if doc.dotted_path in DEFAULT_RULE_PATHS)
-    optional_count = total - default_count
+    optional_count = sum(
+        1 for doc in docs if doc.dotted_path in WRITING_QUALITY_RULE_PATHS
+    )
+    profile_count = total - default_count - optional_count
     header = [
         "---",
         "icon: lucide/list-checks",
@@ -569,7 +575,8 @@ def render_index_page(docs: list[RuleDoc]) -> str:
         "",
         f"The library lists **{total} rules** across four scopes — "
         f"**{default_count}** in the default `ai_slop` pipeline and "
-        f"**{optional_count}** in the opt-in `writing_quality` preset. "
+        f"**{optional_count}** in the opt-in `writing_quality` preset, and "
+        f"**{profile_count}** additional rule for audience profiles. "
         "Open a card to read the full rule page, including example "
         "violations, default thresholds, and a link to the source file.",
         "",

@@ -171,6 +171,7 @@ def short_text_result(
         "weighted_sum": 0.0,
         "density": 0.0,
         "advice": [],
+        "review_requirements": [],
     }
 
 

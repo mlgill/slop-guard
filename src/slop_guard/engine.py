@@ -33,6 +33,8 @@ def analyze_document(
 ) -> AnalysisPayload:
     """Run all configured rules and return score, diagnostics, and advice."""
     active_pipeline = _packaged_default_pipeline() if pipeline is None else pipeline
+    source_text = document.text
+    document = active_pipeline.prepare_document(document)
     count_keys = getattr(active_pipeline, "count_keys", None)
     emits_categories = bool(getattr(active_pipeline, "emits_categories", False))
 
@@ -67,7 +69,7 @@ def analyze_document(
         "word_count": document.word_count,
         "violations": serialize_violations(
             state.violations,
-            document.text,
+            source_text,
             hyperparameters.context_window_chars,
             include_category=emits_categories,
         ),
@@ -76,6 +78,9 @@ def analyze_document(
         "weighted_sum": round(weighted_sum, 2),
         "density": round(density, 2),
         "advice": deduplicate_advice(list(state.advice)),
+        "review_requirements": [
+            item.to_payload() for item in state.review_requirements
+        ],
     }
     if emits_categories:
         category_counts: dict[str, int] = {}

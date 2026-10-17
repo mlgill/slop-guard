@@ -27,7 +27,14 @@ def _qualified_rule_names(rules: list[Rule[Any]]) -> list[str]:
 
 def test_preset_choices_match_documented_set() -> None:
     """The CLI choices and the documented preset names should match."""
-    assert set(PRESET_CHOICES) == {"default", "writing_quality", "all"}
+    assert set(PRESET_CHOICES) == {
+        "default",
+        "writing_quality",
+        "all",
+        "casual",
+        "professional-email",
+        "leadership-update",
+    }
 
 
 def test_preset_jsonl_path_returns_existing_files() -> None:

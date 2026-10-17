@@ -24,6 +24,7 @@ def test_analyze_runs_instantiated_rule_pipeline() -> None:
         "weighted_sum",
         "density",
         "advice",
+        "review_requirements",
     }
     assert result["counts"]["slop_words"] >= 1
     assert any(v["rule"] == "slop_word" for v in result["violations"])

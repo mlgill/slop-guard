@@ -146,6 +146,7 @@ def _analyze_text(
         weighted_sum=result["weighted_sum"],
         density=result["density"],
         advice=result["advice"],
+        review_requirements=result["review_requirements"],
         source=source,
     )
     if "category_counts" in result:
@@ -229,7 +230,8 @@ def _build_parser() -> argparse.ArgumentParser:
         choices=PRESET_CHOICES,
         help=(
             "Load a packaged rule preset by name: 'default' (ai_slop), "
-            "'writing_quality', or 'all'. Mutually exclusive with --config."
+            "'writing_quality', 'all', 'casual', 'professional-email', or "
+            "'leadership-update'. Mutually exclusive with --config."
         ),
     )
     p.add_argument(
@@ -389,6 +391,10 @@ def _emit_result(
             _print_violations(result)
         if result["advice"]:
             _print_advice(result)
+        for requirement in result["review_requirements"]:
+            print(f"  Pending semantic review: {requirement['reason']}")
+            for criterion in requirement["criteria"]:
+                print(f"  - {criterion['key']}: {criterion['instruction']}")
 
 
 def cli_main(argv: list[str] | None = None) -> int:
@@ -438,6 +444,11 @@ def cli_main(argv: list[str] | None = None) -> int:
                 continue
 
         results.append(result)
+        result["profile"] = (
+            args.preset
+            if args.preset is not None
+            else ("custom" if args.config is not None else "default")
+        )
         if args.threshold > 0 and result["score"] < args.threshold:
             threshold_failed = True
 

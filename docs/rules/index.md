@@ -8,7 +8,7 @@ description: Catalog of the rules that slop-guard runs on every check.
 
 `slop-guard` ships a pipeline of small, independently scored rules. Each rule targets one formulaic pattern, flags the exact matching spans, and contributes a penalty toward the final score.
 
-The library lists **38 rules** across four scopes — **24** in the default `ai_slop` pipeline and **14** in the opt-in `writing_quality` preset. Open a card to read the full rule page, including example violations, default thresholds, and a link to the source file.
+The library lists **39 rules** across four scopes — **24** in the default `ai_slop` pipeline and **14** in the opt-in `writing_quality` preset, and **1** additional rule for audience profiles. Open a card to read the full rule page, including example violations, default thresholds, and a link to the source file.
 
 ## Word rules
 
@@ -262,6 +262,12 @@ Whole-document signals. Catches rhythm, density, and repetition across the full 
   <a class="sg-rule-card__link" href="./emoji-in-prose/">
     <div class="sg-rule-card__head"><span class="sg-rule-card__title">Emoji In Prose</span></div>
     <p class="sg-rule-card__summary">Detect emoji embedded in prose.</p>
+  </a>
+</div>
+<div class="sg-rule-card">
+  <a class="sg-rule-card__link" href="./substantial-prose-style/">
+    <div class="sg-rule-card__head"><span class="sg-rule-card__title">Substantial Prose Style</span></div>
+    <p class="sg-rule-card__summary">Check substantial prose and request contextual review.</p>
   </a>
 </div>
 </div>

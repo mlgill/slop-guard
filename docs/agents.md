@@ -41,7 +41,9 @@ Add this source-qualified command to `.mcp.json`:
 
 ## Choose a rule preset
 
-The MCP server reads the same `--preset` flag from its launch arguments that the CLI does. The default rule set is the `ai_slop` preset; pass `--preset writing_quality` for the opinionated style checks, or `--preset all` to run both. Configure two MCP entries when you want both presets available to the agent under separate names.
+The MCP server reads the same `--preset` flag as the CLI. The default preset checks the original rules; `--preset writing_quality` selects the opinionated style checks, and `--preset all` runs both. Both tools also accept a per-call `profile` selector, so one server can expose all presets. Existing separate entries remain supported.
+
+The [writing profiles](writing-profiles.md) add `casual`, `professional-email`, and `leadership-update`. Use `slop-guard --preset casual --require-absolute-paths` for a plugin whose server working directory may differ from the caller's workspace. Always send absolute paths to that server. Assess any returned `review_requirements` before claiming the draft meets the chosen profile; deterministic scoring does not perform that review.
 
 Codex `~/.codex/config.toml`:
 

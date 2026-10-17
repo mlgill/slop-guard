@@ -8,18 +8,29 @@ do not need to resolve absolute paths themselves.
 
 from importlib.resources import files
 from pathlib import Path
+from typing import Literal, TypeAlias
 
 from .pipeline import Pipeline
 
-SINGLE_PRESET_NAMES: tuple[str, ...] = ("default", "writing_quality")
-PRESET_CHOICES: tuple[str, ...] = ("default", "writing_quality", "all")
+LEGACY_PRESET_NAMES: tuple[str, ...] = ("default", "writing_quality")
+PROFILE_NAMES: tuple[str, ...] = ("casual", "professional-email", "leadership-update")
+SINGLE_PRESET_NAMES: tuple[str, ...] = LEGACY_PRESET_NAMES + PROFILE_NAMES
+PRESET_CHOICES: tuple[str, ...] = SINGLE_PRESET_NAMES + ("all",)
+ProfileName: TypeAlias = Literal[
+    "default",
+    "writing_quality",
+    "all",
+    "casual",
+    "professional-email",
+    "leadership-update",
+]
 
 
 def preset_jsonl_path(name: str) -> Path:
     """Return the absolute path of a single packaged preset JSONL.
 
     Args:
-        name: One of ``"default"`` or ``"writing_quality"``.
+        name: A single packaged preset, including a named writing profile.
 
     Returns:
         Filesystem path to the bundled JSONL.
@@ -52,7 +63,7 @@ def load_preset(name: str) -> Pipeline:
     """
     if name == "all":
         rules: list = []
-        for single in SINGLE_PRESET_NAMES:
+        for single in LEGACY_PRESET_NAMES:
             rules.extend(Pipeline.from_jsonl(preset_jsonl_path(single)).rules)
         return Pipeline(rules)
     if name in SINGLE_PRESET_NAMES:
