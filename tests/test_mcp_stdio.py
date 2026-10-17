@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
 import sys
+import sysconfig
 from pathlib import Path
 
 import jsonschema
@@ -26,10 +28,16 @@ def test_installed_server_returns_valid_results_over_stdio(
     text = "This comprehensive solution leverages best practices. It is very important."
     target = tmp_path / "sample prose.md"
     target.write_text(text, encoding="utf-8")
-    args = ["-m", "slop_guard"]
+    executable = Path(sysconfig.get_path("scripts")) / (
+        "slop-guard.exe" if os.name == "nt" else "slop-guard"
+    )
+    assert executable.is_file()
+    args: list[str] = []
     if preset is not None:
         args.extend(["--preset", preset])
-    server = StdioServerParameters(command=sys.executable, args=args, cwd=str(tmp_path))
+    server = StdioServerParameters(
+        command=str(executable), args=args, cwd=str(tmp_path)
+    )
 
     async def exercise() -> None:
         """Initialize, discover tools, and validate their wire-format results."""
