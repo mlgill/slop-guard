@@ -417,6 +417,7 @@ def cli_main(argv: list[str] | None = None) -> int:
 
     results: list[SourceAnalysisPayload] = []
     threshold_failed = False
+    read_failed = False
     hp = DEFAULT_HYPERPARAMETERS
     try:
         pipeline = _load_pipeline(args.config, args.preset)
@@ -436,11 +437,13 @@ def cli_main(argv: list[str] | None = None) -> int:
             path = target.value
             if not path.is_file():
                 print(f"sg: {path}: No such file", file=sys.stderr)
+                read_failed = True
                 continue
             try:
                 result = _analyze_file(path, hp, pipeline)
             except (OSError, UnicodeDecodeError) as exc:
                 print(f"sg: {path}: {exc}", file=sys.stderr)
+                read_failed = True
                 continue
 
         results.append(result)
@@ -465,6 +468,8 @@ def cli_main(argv: list[str] | None = None) -> int:
         sys.stdout.write("\n")
 
     # --- Exit code ---
+    if read_failed:
+        return EXIT_ERROR
     if threshold_failed:
         return EXIT_THRESHOLD_FAILURE
 
